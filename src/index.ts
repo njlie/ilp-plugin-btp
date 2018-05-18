@@ -13,11 +13,11 @@ const BtpPacket = require('btp-packet')
 const debug = Debug('ilp-plugin-btp')
 
 enum ReadyState {
-  STATE_INITIAL = 0,
-  STATE_CONNECTING = 1,
-  STATE_CONNECTED = 2,
-  STATE_DISCONNECTED = 3,
-  STATE_READY_TO_EMIT = 4
+  INITIAL = 0,
+  CONNECTING = 1,
+  CONNECTED = 2,
+  DISCONNECTED = 3,
+  READY_TO_EMIT = 4
 }
 
 const DEFAULT_TIMEOUT = 35000
@@ -134,7 +134,7 @@ export default class AbstractBtpPlugin extends EventEmitter2 {
 
   private _dataHandler?: DataHandler
   private _moneyHandler?: MoneyHandler
-  private _readyState: ReadyState = ReadyState.STATE_INITIAL
+  private _readyState: ReadyState = ReadyState.INITIAL
   private _debug: (formatter: any, ...args: any[]) => void
 
   // Server
@@ -158,11 +158,11 @@ export default class AbstractBtpPlugin extends EventEmitter2 {
     this._debug = (modules && modules.log && modules.log.debug) || debug
   }
   async connect () {
-    if (this._readyState > ReadyState.STATE_INITIAL) {
+    if (this._readyState > ReadyState.INITIAL) {
       return
     }
 
-    this._readyState = ReadyState.STATE_CONNECTING
+    this._readyState = ReadyState.CONNECTING
 
     if (this._listener) {
       const wss = this._wss = new WebSocket.Server({ port: this._listener.port })
@@ -291,7 +291,7 @@ export default class AbstractBtpPlugin extends EventEmitter2 {
       await this._connect()
     }
 
-    this._readyState = ReadyState.STATE_READY_TO_EMIT
+    this._readyState = ReadyState.READY_TO_EMIT
     this._emitConnect()
   }
 
@@ -328,7 +328,7 @@ export default class AbstractBtpPlugin extends EventEmitter2 {
   }
 
   isConnected () {
-    return this._readyState === ReadyState.STATE_CONNECTED
+    return this._readyState === ReadyState.CONNECTED
   }
 
   async _handleIncomingWsMessage (ws: WebSocket, binaryMessage: WebSocket.Data) {
@@ -544,17 +544,17 @@ export default class AbstractBtpPlugin extends EventEmitter2 {
   }
 
   _emitDisconnect () {
-    if (this._readyState !== ReadyState.STATE_DISCONNECTED) {
-      this._readyState = ReadyState.STATE_DISCONNECTED
+    if (this._readyState !== ReadyState.DISCONNECTED) {
+      this._readyState = ReadyState.DISCONNECTED
       this.emit('disconnect')
     }
   }
 
   _emitConnect () {
-    if (this._readyState === ReadyState.STATE_CONNECTING) {
+    if (this._readyState === ReadyState.CONNECTING) {
       this.emit('_first_time_connect')
-    } else if (this._readyState === ReadyState.STATE_READY_TO_EMIT || this._readyState === ReadyState.STATE_DISCONNECTED) {
-      this._readyState = ReadyState.STATE_CONNECTED
+    } else if (this._readyState === ReadyState.READY_TO_EMIT || this._readyState === ReadyState.DISCONNECTED) {
+      this._readyState = ReadyState.CONNECTED
       this.emit('connect')
     }
   }
